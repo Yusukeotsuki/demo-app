@@ -125,7 +125,8 @@ export default {
         if (idx === -1) {
           this.messages.push({ id: msgId, from, text: buffer })
         } else {
-          this.$set(this.messages, idx, { id: msgId, from, text: buffer })
+          // Vue 3 no longer provides $set, so update array element directly
+          this.messages[idx] = { id: msgId, from, text: buffer }
         }
       }
 
