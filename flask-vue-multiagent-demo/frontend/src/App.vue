@@ -1,85 +1,62 @@
 <template>
-  <div class="max-w-3xl mx-auto mt-10 p-6 bg-white/80 backdrop-blur-md shadow-2xl rounded-xl">
-    <!-- タイトル -->
-    <h1 class="text-4xl font-extrabold mb-6 text-center bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-pink-600">Multi-Agent Chat</h1>
-
-    <!-- チャット履歴 -->
-    <div class="space-y-4 h-[600px] overflow-y-auto mb-6">
-      <div
-        v-for="msg in messages"
-        :key="msg.id"
-        class="flex"
-        :class="msg.from === 'user' ? 'justify-end' : 'justify-start'"
-      >
-        <!-- エージェント発言 -->
-        <template v-if="msg.from !== 'user'">
-          <div class="max-w-[70%]">
-            <!-- ヘッダー -->
-            <div class="flex items-center bg-blue-500 text-white px-3 py-1 rounded-t-lg">
-              <img
-                :src="`/${msg.from}.svg`"
-                alt="Agent Icon"
-                class="h-5 w-5 rounded-full mr-2"
-              />
-              <span class="font-semibold">{{ msg.from }}</span>
-            </div>
-            <!-- 本文 -->
+  <v-app>
+    <v-main class="d-flex align-center justify-center bg-grey-lighten-4" style="min-height: 100vh;">
+      <v-card elevation="10" class="pa-6" max-width="800">
+        <v-card-title class="text-h4 text-center bg-gradient-to-r from-purple-400 to-pink-600 text-transparent bg-clip-text">
+          Multi-Agent Chat
+        </v-card-title>
+        <v-card-text>
+          <div class="overflow-y-auto mb-6" style="height: 600px;">
             <div
-              class="bg-blue-100/80 backdrop-blur-sm text-black px-4 py-3 rounded-b-lg whitespace-pre-wrap prose prose-sm shadow"
+              v-for="msg in messages"
+              :key="msg.id"
+              class="d-flex mb-4"
+              :class="msg.from === 'user' ? 'justify-end' : 'justify-start'"
             >
-              <div v-html="renderMarkdown(msg.text)"></div>
+              <template v-if="msg.from !== 'user'">
+                <v-card class="ma-2" color="blue-lighten-4" width="70%">
+                  <v-card-title class="d-flex align-center blue">
+                    <v-avatar class="mr-2" size="24">
+                      <img :src="`/${msg.from}.svg`" alt="Agent" />
+                    </v-avatar>
+                    <span class="font-weight-medium text-white">{{ msg.from }}</span>
+                  </v-card-title>
+                  <v-card-text class="text-body-2">
+                    <div v-html="renderMarkdown(msg.text)" class="prose"></div>
+                  </v-card-text>
+                </v-card>
+              </template>
+              <template v-else>
+                <v-card class="ma-2" color="green" dark width="70%">
+                  <v-card-text>{{ msg.text }}</v-card-text>
+                </v-card>
+              </template>
             </div>
           </div>
-        </template>
-
-        <!-- ユーザー発言 -->
-        <template v-else>
-          <div class="max-w-[70%] flex justify-end">
-            <div class="bg-gradient-to-r from-emerald-400 to-emerald-600 text-white px-4 py-3 rounded-lg shadow">
-              <p>{{ msg.text }}</p>
-            </div>
+          <div class="d-flex align-center">
+            <v-text-field
+              v-model="input"
+              @keyup.enter="sendMessage"
+              hide-details
+              class="flex-grow-1 mr-2"
+              placeholder="Type a message or attach Excel..."
+            ></v-text-field>
+            <v-btn color="amber" class="mr-2" @click="$refs.fileInput.click()">
+              Attach
+            </v-btn>
+            <input
+              type="file"
+              ref="fileInput"
+              accept=".xlsx,.xls"
+              class="d-none"
+              @change="onFileChange"
+            />
+            <v-btn color="blue" @click="sendMessage">Send</v-btn>
           </div>
-        </template>
-      </div>
-    </div>
-
-    <!-- 入力欄 & 添付ボタン -->
-    <div class="flex items-center space-x-2">
-      <div class="relative flex-1">
-        <input
-          v-model="input"
-          @keyup.enter="sendMessage"
-          class="w-full border rounded-full px-4 py-2 pr-12 focus:outline-none bg-white/70"
-          placeholder="Type a message or attach Excel..."
-        />
-        <img
-          v-if="showExcelIcon"
-          src="/excel_icon.svg"
-          alt="Excel Icon"
-          class="absolute right-4 top-1/2 transform -translate-y-1/2 h-6 w-6"
-        />
-      </div>
-      <button
-        @click="$refs.fileInput.click()"
-        class="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded-lg transition"
-      >
-        Attach
-      </button>
-      <input
-        type="file"
-        ref="fileInput"
-        accept=".xlsx,.xls"
-        class="hidden"
-        @change="onFileChange"
-      />
-      <button
-        @click="sendMessage"
-        class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg transition"
-      >
-        Send
-      </button>
-    </div>
-  </div>
+        </v-card-text>
+      </v-card>
+    </v-main>
+  </v-app>
 </template>
 
 <script>
@@ -148,7 +125,8 @@ export default {
         if (idx === -1) {
           this.messages.push({ id: msgId, from, text: buffer })
         } else {
-          this.$set(this.messages, idx, { id: msgId, from, text: buffer })
+          // Vue 3 no longer provides $set, so update array element directly
+          this.messages[idx] = { id: msgId, from, text: buffer }
         }
       }
 
