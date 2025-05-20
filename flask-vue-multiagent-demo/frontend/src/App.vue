@@ -1,7 +1,7 @@
 <template>
-  <div class="max-w-3xl mx-auto mt-10 p-6 bg-white shadow-lg rounded-lg">
+  <div class="max-w-3xl mx-auto mt-10 p-6 bg-white/80 backdrop-blur-md shadow-2xl rounded-xl">
     <!-- タイトル -->
-    <h1 class="text-3xl font-bold mb-6 text-center">Multi-Agent Chat</h1>
+    <h1 class="text-4xl font-extrabold mb-6 text-center bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-pink-600">Multi-Agent Chat</h1>
 
     <!-- チャット履歴 -->
     <div class="space-y-4 h-[600px] overflow-y-auto mb-6">
@@ -25,7 +25,7 @@
             </div>
             <!-- 本文 -->
             <div
-              class="bg-blue-100 text-black px-4 py-3 rounded-b-lg whitespace-pre-wrap prose prose-sm"
+              class="bg-blue-100/80 backdrop-blur-sm text-black px-4 py-3 rounded-b-lg whitespace-pre-wrap prose prose-sm shadow"
             >
               <div v-html="renderMarkdown(msg.text)"></div>
             </div>
@@ -35,7 +35,7 @@
         <!-- ユーザー発言 -->
         <template v-else>
           <div class="max-w-[70%] flex justify-end">
-            <div class="bg-green-100 text-green-900 px-4 py-3 rounded-lg whitespace-pre-wrap">
+            <div class="bg-gradient-to-r from-emerald-400 to-emerald-600 text-white px-4 py-3 rounded-lg shadow">
               <p>{{ msg.text }}</p>
             </div>
           </div>
@@ -49,7 +49,7 @@
         <input
           v-model="input"
           @keyup.enter="sendMessage"
-          class="w-full border rounded-lg px-4 py-2 pr-12 focus:outline-none"
+          class="w-full border rounded-full px-4 py-2 pr-12 focus:outline-none bg-white/70"
           placeholder="Type a message or attach Excel..."
         />
         <img
@@ -61,7 +61,7 @@
       </div>
       <button
         @click="$refs.fileInput.click()"
-        class="bg-yellow-500 text-white px-4 py-2 rounded-lg"
+        class="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded-lg transition"
       >
         Attach
       </button>
@@ -74,7 +74,7 @@
       />
       <button
         @click="sendMessage"
-        class="bg-blue-600 text-white px-6 py-2 rounded-lg"
+        class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg transition"
       >
         Send
       </button>
