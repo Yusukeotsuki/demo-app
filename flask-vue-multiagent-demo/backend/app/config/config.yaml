@@ -1,0 +1,56 @@
+# インデックス作成の設定
+indexer:
+  output_index_dir: &index_dir "./output/index"
+  cache_dir: "./cache/indexer"
+  batch_size: 16 # 一度にEmbedding APIへリクエストするチャンク数（最大16）
+  chunk_size: 512 # チャンクの最大トークン数。大きすぎるとエラーとなる
+  chunk_overlap: 100 # チャンクのオーバラップサイズ、つまり連続したチャンク間で重複するトークン数
+  separators: # このリスト内の文字の前でチャンクが分割される (先頭の優先順位が最も高い)
+    - "\n\n"
+    - "\n"
+    - "。"
+    - "、"
+    - " "
+    - ""
+
+# 検索の設定
+retriever:
+  # インデックスファイルの場所
+  input_index_dir: *index_dir
+  # 検索結果として提示するチャンクの最大数
+  retrieve_max_n: 15
+  # ハイブリッド検索の重みづけ
+  weights:
+    faiss: 0.5 # Faissの重み
+    bm25: 0.5 # BM25の重み
+
+# リランクの設定
+reranker:
+  # リランクに使用する各チャンクの最大文字数。この数値より長い部分は切り捨てられる
+  # ※ sretriever.retrieve_max_n × reranker.max_chars がLLMのinput最大長を超えないこと
+  max_chars: 150
+  # リランク後の最大チャンク数
+  # リランクした後、上位 {rerank_max_n} 件から回答を生成する
+  rerank_max_n: 5
+
+phrase_converter:
+  conversion_dict_path: "./input/conversion_dict.xlsx"
+  sheet_name: "synonyms"
+
+# AzureOpenAIの設定
+azure_open_ai:
+  # APIリファレンス参照：https://api.python.langchain.com/en/latest/chat_models/langchain_openai.chat_models.azure.AzureChatOpenAI.html
+  llm:
+    temperature: 0
+    max_tokens: 800
+    timeout: 15
+    max_retries: 2
+    frequency_penalty: 0
+    presence_penalty: 0
+    stop:
+      - "<|im_end|>"
+    seed: 42
+  # APIリファレンス参照：https://api.python.langchain.com/en/latest/embeddings/langchain_openai.embeddings.azure.AzureOpenAIEmbeddings.html
+  embedding:
+    timeout: 15
+    max_retries: 2

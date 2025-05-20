@@ -1,0 +1,97 @@
+from app.entities.config import AzureOpenAIConfig
+from langchain.embeddings.cache import CacheBackedEmbeddings
+from langchain_core.output_parsers import JsonOutputParser, StrOutputParser
+from langchain_openai import AzureChatOpenAI, AzureOpenAIEmbeddings
+
+
+class BaseAgent:
+
+    def __init__(self, config: AzureOpenAIConfig, store=None) -> None:
+        self.config = config
+        self.store = store
+        self.embedding = self.build_embedding()
+        self.llm = self.build_llm()
+        self.llm_stream = self.build_llm_stream()
+
+    def build_embedding(self):
+        embedding = AzureOpenAIEmbeddings(
+            # azure_deployment=os.getenv("EMBEDDING_DEPLOYMENT_NAME"),
+            azure_deployment="gpt-4o-mini",
+            # azure_endpoint=os.getenv("AZURE_OPENAI_ENDPOINT"),
+            azure_endpoint="https://test-jpb.openai.azure.com/",
+            # api_key=os.getenv("AZURE_OPENAI_API_KEY"),
+            # api_version=os.getenv("OPENAI_API_VERSION"),
+            api_key="4KMb9GgqUHiLe4g6ei8Y4Tn5jM1NOZgTr8zGbbm90U5ej"
+            "9YFA3IRJQQJ99BEACi0881XJ3w3AAABACOGRKaS",
+            api_version="2024-12-01-preview",
+            timeout=self.config.embedding.timeout,
+            max_retries=self.config.embedding.max_retries,
+        )
+        if self.store:
+            embedding = CacheBackedEmbeddings.from_bytes_store(
+                embedding,
+                self.store,
+                namespace=embedding.model,
+                batch_size=100,  # キャッシュを保存する間隔
+            )
+        return embedding
+
+    def build_llm(self):
+        return AzureChatOpenAI(
+            # azure_deployment=os.environ["LLM_DEPLOYMENT_NAME"],
+            # azure_endpoint=os.environ["AZURE_OPENAI_ENDPOINT"],
+            # api_key=os.environ["AZURE_OPENAI_API_KEY"],
+            # api_version=os.environ["OPENAI_API_VERSION"],
+            azure_deployment="gpt-4o-mini",
+            azure_endpoint="https://test-jpb.openai.azure.com/",
+            api_key="4KMb9GgqUHiLe4g6ei8Y4Tn5jM1NOZgTr8zGbbm90U5ej"
+            "9YFA3IRJQQJ99BEACi0881XJ3w3AAABACOGRKaS",
+            api_version="2024-12-01-preview",
+            temperature=self.config.llm.temperature,
+            max_tokens=self.config.llm.max_tokens,
+            timeout=self.config.llm.timeout,
+            max_retries=self.config.llm.max_retries,
+            frequency_penalty=self.config.llm.frequency_penalty,
+            presence_penalty=self.config.llm.presence_penalty,
+            stop=self.config.llm.stop,
+            seed=self.config.llm.seed,
+        )
+
+    def build_llm_stream(self):
+        return AzureChatOpenAI(
+            # azure_deployment=os.environ["LLM_DEPLOYMENT_NAME"],
+            # azure_endpoint=os.environ["AZURE_OPENAI_ENDPOINT"],
+            # api_key=os.environ["AZURE_OPENAI_API_KEY"],
+            # api_version=os.environ["OPENAI_API_VERSION"],
+            azure_deployment="gpt-4o-mini",
+            azure_endpoint="https://test-jpb.openai.azure.com/",
+            api_key="4KMb9GgqUHiLe4g6ei8Y4Tn5jM1NOZgTr8zGbbm90U5ej"
+            "9YFA3IRJQQJ99BEACi0881XJ3w3AAABACOGRKaS",
+            api_version="2024-12-01-preview",
+            temperature=self.config.llm.temperature,
+            max_tokens=self.config.llm.max_tokens,
+            timeout=self.config.llm.timeout,
+            max_retries=self.config.llm.max_retries,
+            frequency_penalty=self.config.llm.frequency_penalty,
+            presence_penalty=self.config.llm.presence_penalty,
+            stop=self.config.llm.stop,
+            seed=self.config.llm.seed,
+            streaming=True,
+        )
+
+    def run(self, input_text: str) -> str:
+        """各エージェントでオーバーライドしてください。"""
+        raise NotImplementedError
+
+    # # ===============================
+    # # 情報整理エージェント
+    # # ===============================
+    # def organize_information(self, input):
+    #     prompt = ChatPromptTemplate.from_messages(
+    #         [
+    #             ("human", ORGANIZE_INFORMATION_PROMPT.strip()),
+    #         ]
+    #     )
+    #     chain = prompt | self.llm | StrOutputParser()
+    #     response = chain.invoke({"input": input})
+    #     return response
